@@ -1,0 +1,19 @@
+
+#main stuff not needed to build project
+Handmade.VC.db
+Handmade.VC.VC.opendb
+
+#all photoshop assets
+Handmade/Assets/PSD
+
+#.vs hidden folder 
+.vs
+
+#the outer Debug/Release folders
+Debug
+Release
+
+#the inner Debug/Release folders
+Handmade/Debug
+Handmade/Release
+Documentation/~$chnical Reference.docx
