@@ -47,6 +47,7 @@
 const int MAX_WIDTH = 20;
 const int MAX_HEIGHT = 10;
 
+class Button;
 class Movable;
 class PlayState : public GameState
 {
@@ -54,6 +55,7 @@ class PlayState : public GameState
 public:
 
 	PlayState();
+	PlayState(std::string file);
 	virtual ~PlayState() {}
 
 public:
@@ -71,11 +73,18 @@ public:	//My staff
 	std::vector<Player*> GetPlayerVector() { return Players;  }
 	void AddMovable( Movable& moveable) { Movables.push_back(&moveable); }
 	void SetPlayer(int player, Player& playerObject);
+	virtual void GoBack() { isBackPressed = true; }
+	void SetFileName(std::string fileName) { strcpy_s(filename,  fileName.c_str() ); }
+	void CheckIfComplete();
+	virtual std::string GetFilename() { return filename;  }
+	virtual void StartGame( std::string fileName);			//Load the Level from the file 
 private:
 	Background* m_image;
 	std::vector<GameObject*> m_gameObjects;
 	//My staff
-	void LoadLevel(const std::string& fileName);			//Load the Level from the file (Actually Gets the string)
+	
+	bool isBackPressed;
+	char filename[MAX_PATH];	//char array for storing the filePath
 
 	std::string m_level;		//The current level Loaded
 	//The two Players *Only the player one is Playeable from this app
@@ -85,6 +94,9 @@ private:
 	 std::vector<Movable*> Movables;  //Store all the movables here
 	std::vector<Player*> Players;	//Vector for storing the Players
 	std::vector<Cell*> m_Tiles;		//Vector Storing All the tiles
+	bool isLevelComplete;
+	Button* btn_Back;
+	Button* btn_Reset;
 };
 
 #endif

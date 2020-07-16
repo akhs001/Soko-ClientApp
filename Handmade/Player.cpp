@@ -48,7 +48,6 @@ bool Player::CheckCollision()
 	{
 		if (m_collider.IsColliding(m->GetCollider()))
 		{
-			std::cout << "HIT MOVEABLE\n";
 			if (m->CanMove(PlayerMove)) //If the Movable Object can move to the direction of player
 			{
 				m->Move(PlayerMove, 50); //Move

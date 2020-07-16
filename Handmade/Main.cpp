@@ -47,7 +47,7 @@ int main(int argc, char* args[])
 	Game* game = new Game(new MenuState);
 
 	//initialize the game
-	if (!(game->Initialize("<insert game name here>", 1280, 720)))
+	if (!(game->Initialize("Soko MultiPlayer  (Created By Thanos Athanasiadis)", 1280, 720)))
 	{
 		return 0;
 	}

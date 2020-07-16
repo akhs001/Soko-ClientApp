@@ -5,17 +5,22 @@
 #include "PlayState.h"
 #include <iostream>
 #include "Button.h"
+#include "Sound.h"
+#include <filesystem>
+#include <string>
 //------------------------------------------------------------------------------------------------------
 //constructor that assigns all default values
 //------------------------------------------------------------------------------------------------------
 
-
+namespace fs = std::filesystem;
 
 MenuState::MenuState()
 {
+	isQuitPressed = false;
 	m_GameStart = false;
 	bg = nullptr;
 	btn_SinglePlayer = nullptr;
+	btn_MultiPlayer = nullptr;
 }
 //------------------------------------------------------------------------------------------------------
 //function that creates a new background screen object and menu
@@ -24,16 +29,15 @@ static bool isStaffLoaded = false;
 
 bool MenuState::OnEnter()
 {
+
+
 	//Load Background
 	bg = new Background("Assets/Images/BG/bg.png");
-
-
-
+	
 	//Load All staff here
 	if (!isStaffLoaded)
 	{
-		Sound::Load("Assets/Sounds/click.wav", "_CLICK");
-
+		Sound::Load("Assets/Sounds/click.mp3", "CLICK");
 		//Load Images
 		for (int i = 0; i < 33; i++)
 		{
@@ -48,11 +52,18 @@ bool MenuState::OnEnter()
 
 	}
 
-	btn_SinglePlayer = new Button(10, 100, Vector2(300, 150), "Single Player", "BUTTON");
+	btn_SinglePlayer = new Button(10, 50, Vector2(300, 150), "Single Player", "BUTTON",false);
 	btn_SinglePlayer->SetMenuState(this);
 
+	btn_MultiPlayer = new Button(10, 200, Vector2(300, 150), "MultiPlayer", "BUTTON",false);
+	btn_MultiPlayer->SetMenuState(this);
+
+	btn_Quit = new Button(10, 350, Vector2(300, 150), "Exit", "BUTTON",false);
+	btn_Quit->SetMenuState(this);
 	//seed the random number generator
 	srand(static_cast<unsigned int>(time(0)));
+
+
 
 	return true;
 
@@ -62,16 +73,36 @@ bool MenuState::OnEnter()
 //------------------------------------------------------------------------------------------------------
 GameState* MenuState::Update(int deltaTime)
 {
-	if (m_GameStart)
+	if (isQuitPressed)
 	{
-		return new PlayState();
+		return nullptr;
 	}
 
+	if (m_GameStart)
+	{
+		if (FILENAME == "")
+		{
+			m_GameStart = false;
+			return new PlayState();
+		}
+		else
+		{
+			m_GameStart = false;
+			return new PlayState(FILENAME);
+		}
+
+	}
+
+	for (Button* b : LevelBtns)
+	{
+		b->Update(1);
+	}
 	bg->Update(1);
 
 
 	btn_SinglePlayer->Update(1);
-
+	btn_MultiPlayer->Update(1);
+	btn_Quit->Update(1);
 
 	//otherwise return reference to self
 	//so that we stay in this game state
@@ -85,8 +116,14 @@ bool MenuState::Draw()
 {
 	bg->Draw();
 
+	for (Button* b : LevelBtns)
+	{
+		b->Draw();
+	}
+
 	btn_SinglePlayer->Draw();
-	
+	btn_MultiPlayer->Draw();
+	btn_Quit->Draw();
 	return true;
 
 }
@@ -97,6 +134,34 @@ void MenuState::OnExit()
 {
 	delete bg;
 	delete btn_SinglePlayer;
+	delete btn_MultiPlayer;
+	delete btn_Quit;
+}
+
+void MenuState::ShowLevels()
+{
+	CheckforLevels();
+}
+
+void MenuState::StartGame(std::string level)
+{
+	FILENAME = level;
+	m_GameStart = true;
+}
+
+void MenuState::CheckforLevels()
+{
+	std::string LevelPath = "Assets/Levels/";
+	int c = 1;
+	for (const auto& entry : fs::directory_iterator(LevelPath))
+	{
+		std::string name = entry.path().filename().string();
+
+		Button* b = new Button(250 , (c *20), Vector2( 200 , 20), name , "BUTTON" , true);
+		b->SetMenuState(this);
+		LevelBtns.push_back(b);
+		c+=1;
+	}
 
 }
 

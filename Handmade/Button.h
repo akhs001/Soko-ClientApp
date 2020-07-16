@@ -6,14 +6,13 @@
 #include "Sound.h"
 #include "Vector2.h"
 
-class MenuState;
-
+class GameState;
 
 class Button : public GameObject
 {
 public:
 	//Button();
-	Button(int  x, int y, Vector2 size, const std::string& text, const  std::string& ID);
+	Button(int  x, int y, Vector2 size, const std::string& text, const  std::string& ID, bool isLevel);
 	~Button();
 public:
 	virtual void Update(int deltaTime);
@@ -22,13 +21,14 @@ public:
 	bool isClicked();
 	bool CanClick();
 	void SetColor(int color);
-	void SetMenuState(MenuState* state);
+	void SetMenuState(GameState* state);
 	void CanClick(bool flag);
 	int GetColor();
-	//Vector2 GetPos();
-	//MenuState* GetState();
-
-	//Vector2 GetSize();
+	Vector2 GetPos();
+	GameState* GetState();
+	bool IsLevel() { return m_isLevel;  }
+	void IsLevel(bool flag) {  m_isLevel =flag; }
+	Vector2 GetSize();
 	void SetImage(std::string  ImageID);
 
 private:
@@ -41,6 +41,8 @@ private:
 	Vector2 m_size;
 	AABB m_collider;
 	Vector2 m_pos;
-	MenuState* m_state;
+	GameState* m_state;
+	bool m_isLevel;
+
 };
 

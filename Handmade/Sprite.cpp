@@ -34,7 +34,6 @@ bool Sprite::Load(const std::string& filename, const std::string& mapIndex)
 	SDL_FreeSurface(imageData);
 
 	(*s_images)[mapIndex] = image;
-
 	return true;
 
 }

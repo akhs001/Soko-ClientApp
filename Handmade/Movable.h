@@ -3,6 +3,8 @@
 #include "PlayState.h"
 #include "Vector2.h"
 #include "Sprite.h"
+#include "Sound.h"
+
 
 class Movable :public GameObject
 {
@@ -17,6 +19,8 @@ public:
 	AABB GetCollider() { return m_collider;  }
 	void Move(Movement movement, int amount);
 	bool CanMove(Movement movement);
+	bool IsOnPlace() { return m_OnPlace;  }
+	void IsOnPlace(bool flag) { m_OnPlace = flag; }
 private:
 	Sprite m_image;
 	Vector2 m_position;
@@ -24,6 +28,8 @@ private:
 	bool m_canMove;
 	AABB m_collider;
 	PlayState* m_state;
-
+	bool m_OnPlace;
+	Sound m_onPlaceSnd;
+	Sound m_moveSnd;
 };
 

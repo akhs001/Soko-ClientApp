@@ -38,7 +38,7 @@
 #include "Background.h"
 #include "GameState.h"
 #include "Sound.h"
-
+#include <vector>
 
 class Button;
 
@@ -53,11 +53,20 @@ public:
 	virtual GameState* Update(int deltaTime);
 	virtual bool Draw();
 	virtual void OnExit();
-	void StartGame() { m_GameStart = true; }
+	virtual void ShowLevels();
+	virtual void StartGame(std::string level);
+	virtual void Quit() { isQuitPressed = true; }
+	void CheckforLevels();
 private:
+	std::string FILENAME;
 	Background* bg;
 	Button* btn_SinglePlayer;
+	Button* btn_MultiPlayer;
+	Button* btn_Quit;
 	bool m_GameStart;
+	Sound m_snd;
+	bool isQuitPressed;
+	std::vector<Button*> LevelBtns;
 };
 
 #endif

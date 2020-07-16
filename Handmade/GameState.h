@@ -49,6 +49,12 @@ public:
 	virtual bool Draw() = 0;
 	virtual void OnExit() = 0;
 
+	virtual std::string GetFilename() { return ""; }
+	virtual void ShowLevels() {};
+	virtual void StartGame() {};
+	virtual void StartGame(std::string level) {};
+	virtual void GoBack() {};
+	virtual void Quit() {};
 };
 
 #endif

@@ -8,42 +8,61 @@
 #include "Screen.h"
 #include "Player.h"
 #include "Movable.h"
-
-char filename[MAX_PATH];	//char array for storing the filePath
-
-
+#include "Button.h"
 
 PlayState::PlayState()
+{
+	isLevelComplete = false;
+	m_Player1 = nullptr;
+	m_Player2 = nullptr;
+	m_level = "";
+	m_image = nullptr;
+	btn_Back = nullptr;
+	btn_Reset = nullptr;
+}
+PlayState::PlayState(std::string file)
 {
 	m_Player1 = nullptr;
 	m_Player2 = nullptr;
 	m_level = "";
 	m_image = nullptr;
+	btn_Back = nullptr;
+	btn_Reset = nullptr;
+	strcpy_s( filename , file.c_str() );
 }
 //------------------------------------------------------------------------------------------------------
 //function that creates all game objects for the state
 //------------------------------------------------------------------------------------------------------
 bool PlayState::OnEnter()
 {
-
+	isBackPressed = false;
 	m_image = new Background("Assets/Images/BG/bg.png");
 
+	//Create the button
+	btn_Back = new Button(10, 10, Vector2(100, 50), "BACK", "BUTTON",false);
+	btn_Back->SetMenuState(this);
+	btn_Reset = new Button(10, 50, Vector2(100, 50), "RESET", "BUTTON", false);
+	btn_Reset->SetMenuState(this);
+
 	//On enter Ask for Level File to open
-	if (!OpenFile())
+	if (filename != nullptr)
 	{
-		MessageBox(0, "Wrong LevelFile", "Wrong Level", MB_OK);
+		StartGame(filename);//Get the level from the file
 	}
-	else
-	{
-		 LoadLevel(filename);//Get the level from the file
-	}
+
 	return true;
 }
 //------------------------------------------------------------------------------------------------------
 //function that reads key presses, mouse clicks and updates all game objects in scene
 //------------------------------------------------------------------------------------------------------
+float counter = 0.0f;
 GameState* PlayState::Update(int deltaTime)
 {
+	if (isBackPressed)
+	{
+		isBackPressed = false;
+		return new MenuState;
+	}
 	//Update Players
 	for (Player* p : Players)
 	{
@@ -62,6 +81,26 @@ GameState* PlayState::Update(int deltaTime)
 		if (c != nullptr)
 			c->Update(1);
 	}
+
+	btn_Back->Update(1);
+	btn_Reset->Update(1);
+
+	if (isLevelComplete)
+	{
+		counter += 0.1f;
+
+		if (counter > 10)
+		{
+			Utils::ShowMessage("Level Cleared", "Good Job");
+			isLevelComplete = false;
+			counter = 0.0f;
+			//Save Progress
+			//TODO
+		}
+	
+
+	}
+
 
 
 	//loop through all game objects in vector and update them only if they are active
@@ -86,6 +125,8 @@ bool PlayState::Draw()
 	//render the background image
 	m_image->Draw();
 
+	btn_Back->Draw();
+	btn_Reset->Draw();
 	//loop through all game objects in vector and 
 	//display them only if they are active and visible
 	for (auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
@@ -160,8 +201,13 @@ bool PlayState::OpenFile()
 
 
 
-void PlayState::LoadLevel(const std::string& fileName)
+void PlayState::StartGame( std::string fileName)
 {
+
+	Movables.clear();
+	Players.clear();
+	m_Tiles.clear();
+
 	std::ifstream file(fileName, std::ios_base::binary);
 
 	//get the size
@@ -194,9 +240,15 @@ void PlayState::LoadLevel(const std::string& fileName)
 			//check the Number of the cell
 			int cellNumber;
 			file.read((char*)&cellNumber, sizeof(int));
-
+	
 			if (cellNumber == 32)
 			{
+				//Create Floor
+								//Create Floor at the botton of the Player
+				thecell = new Cell(i * 50 + middleX, j * 50 + middleY, std::to_string(22));
+				thecell->SetTile(22);
+				m_Tiles.push_back(thecell);
+				//Create The ball
 				std::cout << "Create Movable";
 				Movable* ball = new Movable(i * 50 + middleX, j * 50 + middleY, std::to_string(32));
 				ball->SetPlayState(this);
@@ -227,18 +279,19 @@ void PlayState::LoadLevel(const std::string& fileName)
 					break;
 				}
 			}
-			else if (cellNumber == -1)
+		/*	else if (cellNumber == -1)
 			{
 				thecell = new Cell(i * 50 + middleX, j * 50+ middleY , std::to_string(0));
+				thecell->SetTile(0);
 				m_Tiles.push_back(thecell);
-			}
+			}*/
 			else
 			{
 				std::string name = std::to_string(cellNumber) + ".png";
 				std::string id = "TILE_" + std::to_string(cellNumber);
 				std::string filename = "Assets/mapImages/Decor_Tiles/" + name;
-
 				thecell = new Cell(i *50+ middleX, j * 50 + middleY, std::to_string(cellNumber));
+				thecell->SetTile(cellNumber);
 				m_Tiles.push_back(thecell);
 			}
 		}
@@ -263,7 +316,21 @@ void PlayState::SetPlayer(int player,  Player& playerObject)
 	}
 }
 
-// DEPRECATED -> Moved to GridMaker class
-//void PlayState::CreateLevel(int width, int height,const std::vector<std::string>& LevelData)
-//{
-//}
+void PlayState::CheckIfComplete()
+{
+	for (Movable* m : Movables)
+	{
+		if (!m->IsOnPlace())
+		{
+			isLevelComplete = false;
+			return;
+		}
+	}
+	//Level complete
+	isLevelComplete = true;
+
+}
+
+
+
+
