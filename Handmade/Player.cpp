@@ -13,8 +13,10 @@ Player::Player(int x, int y,  std::string ID)
 	m_canControl = false;
 	m_state = NULL;
 	m_canMove = true;
-	m_position={ x,y };
-	m_size = { SIZE_OF_TILES,SIZE_OF_TILES };
+	m_position.x = x;
+	m_position.y = y;
+	m_size.x = SIZE_OF_TILES;
+	m_size.y = SIZE_OF_TILES;
 
 	m_image.SetImageDimension(1, 1, IMAGE_SIZE, IMAGE_SIZE);
 	m_image.SetSpriteDimension(m_size.x , m_size.y);

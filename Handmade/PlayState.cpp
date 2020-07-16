@@ -15,7 +15,6 @@ char filename[MAX_PATH];	//char array for storing the filePath
 
 PlayState::PlayState()
 {
-	m_gridMaker = nullptr;
 	m_Player1 = nullptr;
 	m_Player2 = nullptr;
 	m_level = "";
@@ -26,9 +25,8 @@ PlayState::PlayState()
 //------------------------------------------------------------------------------------------------------
 bool PlayState::OnEnter()
 {
-	m_gridMaker = new GridMaker(this);
 
-	m_image = new Background("Assets/Images/Play_1280x720.png", "Assets/Music/Play.ogg");
+	m_image = new Background("Assets/Images/BG/bg.png");
 
 	//On enter Ask for Level File to open
 	if (!OpenFile())
@@ -37,22 +35,7 @@ bool PlayState::OnEnter()
 	}
 	else
 	{
-		m_level = LoadLevel(filename);		//Get the level from the file
-		std::vector<std::string> levelData;		//vector to store all the data tiles from the level
-		levelData = Utils::Split(m_level, ',');		//Use my function Split to split the one string into chunks
-		//Check if the level is correct
-		if (levelData.size() > 25)
-		{
-			int m_levelWidth = std::stoi(levelData[0]);				//Get the level width
-			int m_levelHeight = std::stoi(levelData[1]);			//Get the level height
-
-			//CreateLevel(m_levelWidth, m_levelHeight, levelData);	//Create the level
-			m_gridMaker->CreateLevel(m_Tiles,  m_levelWidth, m_levelHeight, levelData);
-		}
-		else
-		{
-			MessageBox(0, "Wrong LevelFile", "Wrong Level", MB_OK);
-		}
+		 LoadLevel(filename);//Get the level from the file
 	}
 	return true;
 }
@@ -80,19 +63,6 @@ GameState* PlayState::Update(int deltaTime)
 			c->Update(1);
 	}
 
-	//the M key moves to the main menu
-	if (Input::Instance()->IsKeyPressed(HM_KEY_M))
-	{
-		m_image->StopMusic();
-		return new MenuState;
-	}
-
-	//the Q key moves to the ending state
-	if (Input::Instance()->IsKeyPressed(HM_KEY_Q))
-	{
-		m_image->StopMusic();
-		return new EndState;
-	}
 
 	//loop through all game objects in vector and update them only if they are active
 	for (auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
@@ -160,7 +130,6 @@ void PlayState::OnExit()
 
 	m_gameObjects.clear();
 	m_Tiles.clear();
-	delete m_gridMaker;
 }
 
 bool PlayState::OpenFile()
@@ -170,7 +139,7 @@ bool PlayState::OpenFile()
 		ZeroMemory(&ofn, sizeof(ofn));
 		ofn.lStructSize = sizeof(ofn);
 		ofn.hwndOwner = NULL;  // If you have a window to center over, put its HANDLE here
-		ofn.lpstrFilter = ("Text Files\0*.txt\0Any File\0*.*\0");
+		ofn.lpstrFilter = ("Level Files\0*.bin\0");
 		ofn.lpstrFile = filename;
 		ofn.nMaxFile = MAX_PATH;
 		ofn.lpstrTitle = ("Select a Level To Play!");
@@ -190,15 +159,93 @@ bool PlayState::OpenFile()
 }
 
 
-std::string PlayState::LoadLevel(const std::string& fileName)
+
+void PlayState::LoadLevel(const std::string& fileName)
 {
-	std::ifstream ifile(fileName);	//Open the file
+	std::ifstream file(fileName, std::ios_base::binary);
 
-	std::string data;		//Set the data variable
+	//get the size
+	int width = 0;
+	int height = 0;
+	file.read((char*)(&width), sizeof(int));
+	file.read((char*)(&height), sizeof(int));
 
-    std::getline(ifile, data);	//Get the  file Data
 
-	return data;
+	if (width < 5 || height < 5 || width > MAX_WIDTH || height > MAX_HEIGHT)
+	{
+		Utils::ShowMessage("An error found when loading the level.Maybe the leves is corrupted", "Error level");
+		return;
+	}
+
+	int NumCells = width * height;
+
+	int _width = Screen::Instance()->GetResolution().x;
+	int _height = Screen::Instance()->GetResolution().y;
+	float middleX = _width * 0.5f - (50 * width * 0.5f);
+	float middleY = _height * 0.5f - (50 * height * 0.5f);
+	//m_currentWidth = width;
+	//m_currentHeight = height;
+
+	Cell* thecell;
+	for (int j = 0; j < height; j++)
+	{
+		for (int i = 0; i < width; i++)
+		{
+			//check the Number of the cell
+			int cellNumber;
+			file.read((char*)&cellNumber, sizeof(int));
+
+			if (cellNumber == 32)
+			{
+				std::cout << "Create Movable";
+				Movable* ball = new Movable(i * 50 + middleX, j * 50 + middleY, std::to_string(32));
+				ball->SetPlayState(this);
+				Movables.push_back(ball);
+			}
+			else if (cellNumber == 28 || cellNumber == 29)		//If the tile is Player Put the player 28= Player 1 , 29= Player2
+			{
+				//Create Floor at the botton of the Player
+				thecell = new Cell(i * 50 + middleX, j * 50 + middleY, std::to_string(22));
+				thecell->SetTile(22);
+				m_Tiles.push_back(thecell);
+
+				switch (cellNumber)
+				{
+				case 28:
+					Player * p1;
+					p1 = new Player(i * 50 + middleX, j * 50 + middleY, std::to_string(28));
+					p1->IsControllable(true);	//Can control this Player
+					p1->SetPlayState(this);		//Pass the PlayState to the Player
+					SetPlayer(1, *p1);			//Put the Player in the vector
+					break;
+				case 29:
+					Player * p2;
+					p2 = new Player(i * 50 + middleX, j * 50 + middleY, std::to_string(29));
+					p2->IsControllable(false);	//This Player is for Player2
+					p2->SetPlayState(this);		//Pass the PlayState to the Player
+					SetPlayer(1, *p2);			//Put the Player in the vector
+					break;
+				}
+			}
+			else if (cellNumber == -1)
+			{
+				thecell = new Cell(i * 50 + middleX, j * 50+ middleY , std::to_string(0));
+				m_Tiles.push_back(thecell);
+			}
+			else
+			{
+				std::string name = std::to_string(cellNumber) + ".png";
+				std::string id = "TILE_" + std::to_string(cellNumber);
+				std::string filename = "Assets/mapImages/Decor_Tiles/" + name;
+
+				thecell = new Cell(i *50+ middleX, j * 50 + middleY, std::to_string(cellNumber));
+				m_Tiles.push_back(thecell);
+			}
+		}
+	}
+	file.close();
+
+
 }
 
 void PlayState::SetPlayer(int player,  Player& playerObject)

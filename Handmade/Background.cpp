@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------------------------------
 //constructor that loads and links resources, and assigns all default values
 //------------------------------------------------------------------------------------------------------
-Background::Background(const std::string& imageFilename, const std::string& audioFilename)
+Background::Background(const std::string& imageFilename)
 {
 
 	m_isPlaying = false;
@@ -24,7 +24,7 @@ Background::Background(const std::string& imageFilename, const std::string& audi
 
 	//store names of resource tags so that we can remove them in the destructor 
 	m_imageName = imageFilename;
-	m_audioName = audioFilename;
+	//m_audioName = audioFilename;
 	
 }
 //------------------------------------------------------------------------------------------------------

@@ -29,12 +29,12 @@ bool Game::Initialize(const std::string& name, int screenWidth, int screenHeight
 	//set the background rendering color
 	Screen::Instance()->SetClearColor(100, 149, 237);
 
-	//initialize audio sub-system and return false if error occured
-	if (!(Music::Initialize()))
-	{
-		//not serious - game does not need to end
-		//add your own outcome/messages here...
-	}
+	////initialize audio sub-system and return false if error occured
+	//if (!(Music::Initialize()))
+	//{
+	//	//not serious - game does not need to end
+	//	//add your own outcome/messages here...
+	//}
 
 	//initialize font sub-system and return false if error occured
 	if (!Text::Initialize())

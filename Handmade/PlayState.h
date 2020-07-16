@@ -43,8 +43,9 @@
 #include <Windows.h>
 #include <fstream>
 #include "Sprite.h"
-#include "GridMaker.h"
 
+const int MAX_WIDTH = 20;
+const int MAX_HEIGHT = 10;
 
 class Movable;
 class PlayState : public GameState
@@ -71,11 +72,10 @@ public:	//My staff
 	void AddMovable( Movable& moveable) { Movables.push_back(&moveable); }
 	void SetPlayer(int player, Player& playerObject);
 private:
-	GridMaker* m_gridMaker;
 	Background* m_image;
 	std::vector<GameObject*> m_gameObjects;
 	//My staff
-	std::string LoadLevel(const std::string& fileName);			//Load the Level from the file (Actually Gets the string)
+	void LoadLevel(const std::string& fileName);			//Load the Level from the file (Actually Gets the string)
 
 	std::string m_level;		//The current level Loaded
 	//The two Players *Only the player one is Playeable from this app

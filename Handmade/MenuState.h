@@ -37,13 +37,14 @@
 #include <SDL.h>
 #include "Background.h"
 #include "GameState.h"
-#include "MainMenu.h"
+#include "Sound.h"
+
+
+class Button;
 
 class MenuState : public GameState
 {
 
-public:
-	enum class MenuOption { PLAY, QUIT };
 public:
 	MenuState();
 	virtual ~MenuState() {}
@@ -52,8 +53,11 @@ public:
 	virtual GameState* Update(int deltaTime);
 	virtual bool Draw();
 	virtual void OnExit();
+	void StartGame() { m_GameStart = true; }
 private:
-	MainMenu* m_menu;
+	Background* bg;
+	Button* btn_SinglePlayer;
+	bool m_GameStart;
 };
 
 #endif

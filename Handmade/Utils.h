@@ -8,6 +8,7 @@ namespace Utils {
 
 	void draw();
 	void lineBreak(int count);
+	void ShowMessage(std::string msg, std::string title);
 	std::string space(int count);
 	void clearConsole();
 	void TypeWrite(const std::string& text, unsigned int delay);

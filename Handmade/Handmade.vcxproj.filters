@@ -108,10 +108,13 @@
     <ClInclude Include="Sprite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GridMaker.h">
+    <ClInclude Include="Movable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Movable.h">
+    <ClInclude Include="Button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -176,10 +179,13 @@
     <ClCompile Include="Sprite.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="GridMaker.cpp">
+    <ClCompile Include="Movable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Movable.cpp">
+    <ClCompile Include="Button.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

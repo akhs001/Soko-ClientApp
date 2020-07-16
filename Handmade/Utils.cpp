@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include <Windows.h>
 
 void Utils::draw()
 {
@@ -14,6 +15,11 @@ void Utils::draw()
 	
 }
 
+
+void Utils::ShowMessage(std::string msg, std::string title)
+{
+	MessageBoxA(0, msg.c_str(), title.c_str(), MB_OK);
+}
 
 
 void Utils::lineBreak(int count)

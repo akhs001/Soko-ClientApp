@@ -4,14 +4,18 @@
 #include "MenuState.h"
 #include "PlayState.h"
 #include <iostream>
+#include "Button.h"
 //------------------------------------------------------------------------------------------------------
 //constructor that assigns all default values
 //------------------------------------------------------------------------------------------------------
+
+
+
 MenuState::MenuState()
 {
-	m_menu = nullptr;
-	//m_image = nullptr;
-	
+	m_GameStart = false;
+	bg = nullptr;
+	btn_SinglePlayer = nullptr;
 }
 //------------------------------------------------------------------------------------------------------
 //function that creates a new background screen object and menu
@@ -20,9 +24,16 @@ static bool isStaffLoaded = false;
 
 bool MenuState::OnEnter()
 {
+	//Load Background
+	bg = new Background("Assets/Images/BG/bg.png");
+
+
+
 	//Load All staff here
 	if (!isStaffLoaded)
 	{
+		Sound::Load("Assets/Sounds/click.wav", "_CLICK");
+
 		//Load Images
 		for (int i = 0; i < 33; i++)
 		{
@@ -32,14 +43,14 @@ bool MenuState::OnEnter()
 		}
 		//load font resource into memory
 		Text::Load("Assets/Fonts/Quikhand.ttf", "Menu_Font", Text::FontSize::SMALL);
+		Text::Load("Assets/Fonts/Impact.ttf", "FONT", Text::FontSize::SMALL);
 		isStaffLoaded = true;
+
 	}
 
-	m_menu = new MainMenu;
-	m_menu->SetMenuText("Play game");
-	m_menu->SetMenuText("Quit game");
+	btn_SinglePlayer = new Button(10, 100, Vector2(300, 150), "Single Player", "BUTTON");
+	btn_SinglePlayer->SetMenuState(this);
 
-	
 	//seed the random number generator
 	srand(static_cast<unsigned int>(time(0)));
 
@@ -51,27 +62,16 @@ bool MenuState::OnEnter()
 //------------------------------------------------------------------------------------------------------
 GameState* MenuState::Update(int deltaTime)
 {
-
-	//play the background music associated with the image
-	//when the state transitions to the next state stop it
-	//m_image->PlayMusic();
-
-	//update the main menu to determine which menu choice was made
-	m_menu->Update(deltaTime);
-
-	//if player chose to play game, go into main playing state 
-	if (m_menu->GetMenuOption() == static_cast<int>(MenuOption::PLAY))
+	if (m_GameStart)
 	{
-		//m_image->StopMusic();
-		return new PlayState;
+		return new PlayState();
 	}
 
-	//if player chose to exit the game then quit altogether
-	if (m_menu->GetMenuOption() == static_cast<int>(MenuOption::QUIT))
-	{
-		//m_image->StopMusic();
-		return nullptr;
-	}
+	bg->Update(1);
+
+
+	btn_SinglePlayer->Update(1);
+
 
 	//otherwise return reference to self
 	//so that we stay in this game state
@@ -83,9 +83,9 @@ GameState* MenuState::Update(int deltaTime)
 //------------------------------------------------------------------------------------------------------
 bool MenuState::Draw()
 {
+	bg->Draw();
 
-	//m_image->Draw();
-	m_menu->Draw();
+	btn_SinglePlayer->Draw();
 	
 	return true;
 
@@ -95,8 +95,8 @@ bool MenuState::Draw()
 //------------------------------------------------------------------------------------------------------
 void MenuState::OnExit()
 {
-	//delete m_image;
-	delete m_menu;
+	delete bg;
+	delete btn_SinglePlayer;
 
 }
 

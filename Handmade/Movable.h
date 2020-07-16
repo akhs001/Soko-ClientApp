@@ -1,7 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "PlayState.h"
-//#include "AABB.h"
+#include "Vector2.h"
 #include "Sprite.h"
 
 class Movable :public GameObject
@@ -19,8 +19,8 @@ public:
 	bool CanMove(Movement movement);
 private:
 	Sprite m_image;
-	vector2 m_position;
-	vector2 m_size;
+	Vector2 m_position;
+	Vector2 m_size;
 	bool m_canMove;
 	AABB m_collider;
 	PlayState* m_state;
