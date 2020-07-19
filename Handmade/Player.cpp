@@ -8,22 +8,26 @@
 
 Movement PlayerMove;
 
-Player::Player(int x, int y,  std::string ID)
+Player::Player(int x, int y,int size,  std::string ID)
 {
 	m_canControl = false;
 	m_state = NULL;
 	m_canMove = true;
 	m_position.x = x;
 	m_position.y = y;
-	m_size.x = SIZE_OF_TILES;
-	m_size.y = SIZE_OF_TILES;
+	m_size.x = size;
+	m_size.y = size;
 
 	m_image.SetImageDimension(1, 1, IMAGE_SIZE, IMAGE_SIZE);
 	m_image.SetSpriteDimension(m_size.x , m_size.y);
 	m_image.SetImage(ID);
 
-	m_collider.SetDimension(m_size.x, m_size.y);
+	m_collider.SetDimension(size, size);
 	m_collider.SetPosition(m_position.x, m_position.y);
+
+	m_WalkSnd.SetSound("P_MOVE");
+	m_WrongMove.SetSound("WRONG");
+
 }
 
 
@@ -50,7 +54,7 @@ bool Player::CheckCollision()
 		{
 			if (m->CanMove(PlayerMove)) //If the Movable Object can move to the direction of player
 			{
-				m->Move(PlayerMove, 50); //Move
+				m->Move(PlayerMove, GetSize()); //Move
 			}
 			else
 			{
@@ -75,18 +79,7 @@ bool Player::CheckCollision()
 				//Check if c is passable or not
 			int numCell = c->GetTile();
 			
-			if(numCell ==0)	//if its Empty cell you can move
-			{
-				return true;
-			}
-			if (numCell >= 22)	//You can move with those tiles
-			{
-				return true;
-			}
-			if (numCell > 0 && numCell < 22)	//These are wall tile so you cannot move
-			{
-				return false;
-			}
+			return c->IsWalkable();
 		}
 	}
 	return true;
@@ -110,71 +103,82 @@ void Player::Update(int deltaTime)
 	cnt = 0.0f;
 	///****************************************************
 
-
 	//CHECK INPUT
 	if (Input::Instance()->IsKeyPressed(HM_KEY_LEFT))
 	{
 				//Move the Collider
-		m_collider.SetPosition(m_position.x-50, m_position.y);
+		m_collider.SetPosition(m_position.x- GetSize(), m_position.y);
 		PlayerMove = LEFT;
 		//Check all the tiles for collision
 		if (CheckCollision())	//If we can move
 		{
 			//Move the Player
-			m_position.x -= 50;
+			m_WalkSnd.Play();
+			m_position.x -= GetSize();
 			m_canMove = false;
 		}
 		else					//If we cant move
 		{
-			//Return back the collider
 			m_collider.SetPosition(m_position.x, m_position.y);
+			//Return back the collider
+			m_WrongMove.Play();
+			m_canMove = false;
 		}
 	}
 	else if (Input::Instance()->IsKeyPressed(HM_KEY_RIGHT))
 	{
-		m_collider.SetPosition(m_position.x + 50, m_position.y);
+		m_collider.SetPosition(m_position.x + GetSize(), m_position.y);
 		PlayerMove = RIGHT;
 		if (CheckCollision())
 		{
-			m_position.x += 50;
+			m_WalkSnd.Play();
+			m_position.x += GetSize();
 			m_canMove = false;
 		}
 		else
 		{
 			//Return back the collider
 			m_collider.SetPosition(m_position.x, m_position.y);
+			m_WrongMove.Play();
+			m_canMove = false;
 		}
 
 	}
 	else if (Input::Instance()->IsKeyPressed(HM_KEY_UP))
 	{
-		m_collider.SetPosition(m_position.x, m_position.y -50);
+		m_collider.SetPosition(m_position.x, m_position.y - GetSize());
 		PlayerMove = UP;
 		if (CheckCollision())
 		{
-			m_position.y -= 50;
+			m_WalkSnd.Play();
+			m_position.y -= GetSize();
 			m_canMove = false;
 		}
 		else
 		{
 			//Return back the collider
 			m_collider.SetPosition(m_position.x, m_position.y);
+			m_WrongMove.Play();
+			m_canMove = false;
 		}
 
 	}
 	else if (Input::Instance()->IsKeyPressed(HM_KEY_DOWN))
 	{
-		m_collider.SetPosition(m_position.x, m_position.y +50);
+		m_collider.SetPosition(m_position.x, m_position.y + GetSize());
 		PlayerMove = DOWN;
 		if (CheckCollision())
 		{
-			m_position.y += 50;
+			m_WalkSnd.Play();
+			m_position.y += GetSize();
 			m_canMove = false;
 		}
 		else
 		{
 			//Return back the collider
 			m_collider.SetPosition(m_position.x, m_position.y);
+			m_WrongMove.Play();
+			m_canMove = false;
 		}
 	}
 }

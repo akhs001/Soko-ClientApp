@@ -3,7 +3,7 @@
 
 static bool isSoundLoaded = false;
 
-Movable::Movable(int x, int y, std::string ID)
+Movable::Movable(int x, int y,int size, std::string ID)
 {
 	if(!isSoundLoaded)
 	{
@@ -18,14 +18,14 @@ Movable::Movable(int x, int y, std::string ID)
     m_canMove = true;
     m_position.SetX(x );
     m_position.SetY( y );
-    m_size.SetX (50);
-	m_size.SetY(50);
+    m_size.SetX (size);
+	m_size.SetY(size);
 	m_OnPlace = false;
     m_image.SetImageDimension(1, 1, IMAGE_SIZE, IMAGE_SIZE);
     m_image.SetSpriteDimension(m_size.GetX(), m_size.GetY());
     m_image.SetImage(ID);
 
-    m_collider.SetDimension(m_size.GetX(), m_size.GetY());
+    m_collider.SetDimension(size, size);
     m_collider.SetPosition(m_position.GetX(), m_position.GetY());
 }
 
@@ -77,8 +77,49 @@ void Movable::Move(Movement movement, int amount)
 /// <returns></returns>
 bool Movable::CanMove(Movement movement)
 {
+	std::vector<Player*> allPlayers = m_state->GetAllPlayers();
 	std::vector<Cell*> allCells = m_state->GetAllTiles();
 	std::vector<Movable* > allMovables = m_state->GetAllMovables();
+	//Check other Players
+	for (Player* p : allPlayers)
+	{
+		switch (movement)
+		{
+		case LEFT:
+			m_collider.SetPosition(m_position.GetX() - GetSize(), m_position.GetY()); //Move the collider left
+			if (m_collider.IsColliding(p->GetCollider()))
+			{
+				return false;
+			}
+
+			break;
+		case RIGHT:
+			m_collider.SetPosition(m_position.GetX() + GetSize(), m_position.GetY()); //Move the collider left
+			if (m_collider.IsColliding(p->GetCollider()))
+			{
+				return false;
+			}
+
+			break;
+		case UP:
+			m_collider.SetPosition(m_position.GetX(), m_position.GetY() - GetSize()); //Move the collider left
+			if (m_collider.IsColliding(p->GetCollider()))
+			{
+				return false;
+			}
+
+			break;
+		case DOWN:
+			m_collider.SetPosition(m_position.GetX(), m_position.GetY() + GetSize()); //Move the collider left
+			if (m_collider.IsColliding(p->GetCollider()))
+			{
+				return false;
+			}
+
+			break;
+		}
+	}
+	
 	//check other balls
 	for (Movable* m : allMovables)
 	{
@@ -86,7 +127,7 @@ bool Movable::CanMove(Movement movement)
 		switch (movement)
 		{
 		case LEFT:
-			m_collider.SetPosition(m_position.GetX() - 50, m_position.GetY()); //Move the collider left
+			m_collider.SetPosition(m_position.GetX() - GetSize(), m_position.GetY()); //Move the collider left
 			if (m_collider.IsColliding(m->GetCollider()))
 			{
 				return false;
@@ -94,7 +135,7 @@ bool Movable::CanMove(Movement movement)
 
 			break;
 		case RIGHT:
-			m_collider.SetPosition(m_position.GetX() + 50, m_position.GetY()); //Move the collider left
+			m_collider.SetPosition(m_position.GetX() + GetSize(), m_position.GetY()); //Move the collider left
 			if (m_collider.IsColliding(m->GetCollider()))
 			{
 				return false;
@@ -102,7 +143,7 @@ bool Movable::CanMove(Movement movement)
 
 			break;
 		case UP:
-			m_collider.SetPosition(m_position.GetX(), m_position.GetY() - 50); //Move the collider left
+			m_collider.SetPosition(m_position.GetX(), m_position.GetY() - GetSize()); //Move the collider left
 			if (m_collider.IsColliding(m->GetCollider()))
 			{
 				return false;
@@ -110,7 +151,7 @@ bool Movable::CanMove(Movement movement)
 
 			break;
 		case DOWN:
-			m_collider.SetPosition(m_position.GetX(), m_position.GetY() + 50); //Move the collider left
+			m_collider.SetPosition(m_position.GetX(), m_position.GetY() + GetSize()); //Move the collider left
 			if (m_collider.IsColliding(m->GetCollider()))
 			{
 				return false;
@@ -126,7 +167,7 @@ bool Movable::CanMove(Movement movement)
 		switch (movement)
 		{
 		case LEFT:
-			m_collider.SetPosition(m_position.GetX() - 50, m_position.GetY()); //Move the collider left
+			m_collider.SetPosition(m_position.GetX() - GetSize(), m_position.GetY()); //Move the collider left
 			if (m_collider.IsColliding(c->GetCollider()))
 			{
 				//Check if c is passable or not
@@ -141,23 +182,13 @@ bool Movable::CanMove(Movement movement)
 				{
 					m_OnPlace = false;
 				}
-				if (numCell == 0)	//if its Empty cell you can move
-				{
-					return true;
-				}
-				if (numCell >= 22)	//You can move with those tiles
-				{
-					return true;
-				}
-				if (numCell > 0 && numCell < 22)	//These are wall tile so you cannot move
-				{
-					return false;
-				}
+				
+				return c->IsWalkable();
 
 			}
 			break; 
 		case RIGHT:
-			m_collider.SetPosition(m_position.GetX() + 50, m_position.GetY()); //Move the collider left
+			m_collider.SetPosition(m_position.GetX() + GetSize(), m_position.GetY()); //Move the collider left
 			if (m_collider.IsColliding(c->GetCollider()))
 			{
 				//Check if c is passable or not
@@ -172,23 +203,12 @@ bool Movable::CanMove(Movement movement)
 				{
 					m_OnPlace = false;
 				}
-				if (numCell == 0)	//if its Empty cell you can move
-				{
-					return true;
-				}
-				if (numCell >= 22)	//You can move with those tiles
-				{
-					return true;
-				}
-				if (numCell > 0 && numCell < 22)	//These are wall tile so you cannot move
-				{
-					return false;
-				}
+				return c->IsWalkable();
 
 			}
 			break;
 		case UP:
-			m_collider.SetPosition(m_position.GetX() , m_position.GetY()-50); //Move the collider left
+			m_collider.SetPosition(m_position.GetX() , m_position.GetY()- GetSize()); //Move the collider left
 			if (m_collider.IsColliding(c->GetCollider()))
 			{
 				//Check if c is passable or not
@@ -203,23 +223,11 @@ bool Movable::CanMove(Movement movement)
 				{
 					m_OnPlace = false;
 				}
-				if (numCell == 0)	//if its Empty cell you can move
-				{
-					return true;
-				}
-				if (numCell >= 22)	//You can move with those tiles
-				{
-					return true;
-				}
-				if (numCell > 0 && numCell < 22)	//These are wall tile so you cannot move
-				{
-					return false;
-				}
-
+				return c->IsWalkable();
 			}
 			break;
 		case DOWN:
-			m_collider.SetPosition(m_position.GetX() , m_position.GetY()+50); //Move the collider left
+			m_collider.SetPosition(m_position.GetX() , m_position.GetY()+ GetSize()); //Move the collider left
 			if (m_collider.IsColliding(c->GetCollider()))
 			{
 				//Check if c is passable or not
@@ -234,18 +242,7 @@ bool Movable::CanMove(Movement movement)
 				{
 					m_OnPlace = false;
 				}
-				if (numCell == 0)	//if its Empty cell you can move
-				{
-					return true;
-				}
-				if (numCell >= 22)	//You can move with those tiles
-				{
-					return true;
-				}
-				if (numCell > 0 && numCell < 22)	//These are wall tile so you cannot move
-				{
-					return false;
-				}
+				return c->IsWalkable();
 			}
 			break;
 		}

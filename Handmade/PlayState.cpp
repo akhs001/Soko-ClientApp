@@ -203,7 +203,6 @@ bool PlayState::OpenFile()
 
 void PlayState::StartGame( std::string fileName)
 {
-
 	Movables.clear();
 	Players.clear();
 	m_Tiles.clear();
@@ -223,12 +222,17 @@ void PlayState::StartGame( std::string fileName)
 		return;
 	}
 
+
+
 	int NumCells = width * height;
 
 	int _width = Screen::Instance()->GetResolution().x;
 	int _height = Screen::Instance()->GetResolution().y;
-	float middleX = _width * 0.5f - (50 * width * 0.5f);
-	float middleY = _height * 0.5f - (50 * height * 0.5f);
+	//Calculate the tile size
+	int tileS = (_height - 100) / width;
+
+	float middleX = _width * 0.5f - (tileS * width * 0.5f);
+	float middleY = _height * 0.5f - (tileS * height * 0.5f);
 	//m_currentWidth = width;
 	//m_currentHeight = height;
 
@@ -244,20 +248,19 @@ void PlayState::StartGame( std::string fileName)
 			if (cellNumber == 32)
 			{
 				//Create Floor
-								//Create Floor at the botton of the Player
-				thecell = new Cell(i * 50 + middleX, j * 50 + middleY, std::to_string(22));
-				thecell->SetTile(22);
-				m_Tiles.push_back(thecell);
+								//Create Floor at the botton of the ball
+				//thecell = new Cell(i * tileS + middleX, j * tileS + middleY,  tileS,std::to_string(22));
+				//thecell->SetTile(22);
+				//m_Tiles.push_back(thecell);
 				//Create The ball
-				std::cout << "Create Movable";
-				Movable* ball = new Movable(i * 50 + middleX, j * 50 + middleY, std::to_string(32));
+				Movable* ball = new Movable(i * tileS + middleX, j * tileS + middleY, tileS, std::to_string(32));
 				ball->SetPlayState(this);
 				Movables.push_back(ball);
 			}
 			else if (cellNumber == 28 || cellNumber == 29)		//If the tile is Player Put the player 28= Player 1 , 29= Player2
 			{
 				//Create Floor at the botton of the Player
-				thecell = new Cell(i * 50 + middleX, j * 50 + middleY, std::to_string(22));
+				thecell = new Cell(i * tileS + middleX, j * tileS + middleY, tileS, std::to_string(22));
 				thecell->SetTile(22);
 				m_Tiles.push_back(thecell);
 
@@ -265,14 +268,14 @@ void PlayState::StartGame( std::string fileName)
 				{
 				case 28:
 					Player * p1;
-					p1 = new Player(i * 50 + middleX, j * 50 + middleY, std::to_string(28));
+					p1 = new Player(i * tileS + middleX, j * tileS + middleY, tileS, std::to_string(28));
 					p1->IsControllable(true);	//Can control this Player
 					p1->SetPlayState(this);		//Pass the PlayState to the Player
 					SetPlayer(1, *p1);			//Put the Player in the vector
 					break;
 				case 29:
 					Player * p2;
-					p2 = new Player(i * 50 + middleX, j * 50 + middleY, std::to_string(29));
+					p2 = new Player(i * tileS + middleX, j * tileS + middleY, tileS, std::to_string(29));
 					p2->IsControllable(false);	//This Player is for Player2
 					p2->SetPlayState(this);		//Pass the PlayState to the Player
 					SetPlayer(1, *p2);			//Put the Player in the vector
@@ -287,19 +290,23 @@ void PlayState::StartGame( std::string fileName)
 			}*/
 			else
 			{
+				
 				std::string name = std::to_string(cellNumber) + ".png";
 				std::string id = "TILE_" + std::to_string(cellNumber);
 				std::string filename = "Assets/mapImages/Decor_Tiles/" + name;
-				thecell = new Cell(i *50+ middleX, j * 50 + middleY, std::to_string(cellNumber));
+				thecell = new Cell(i * tileS + middleX, j * tileS + middleY, tileS, std::to_string(cellNumber));
 				thecell->SetTile(cellNumber);
+				thecell->SetWalkable(thecell->IsWalkable());		//Set if the cell is walkable or not
 				m_Tiles.push_back(thecell);
 			}
 		}
 	}
 	file.close();
-
-
 }
+
+
+
+
 
 void PlayState::SetPlayer(int player,  Player& playerObject)
 {

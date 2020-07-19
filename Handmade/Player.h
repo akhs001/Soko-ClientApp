@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Sprite.h"
 #include "AABB.h"
+#include "Sound.h"
 
 const int SIZE_OF_TILES = 50;
 const int IMAGE_SIZE = 128;
@@ -17,7 +18,7 @@ class PlayState;
 class Player : public GameObject
 {
 public:
-	Player(int x, int y,  std::string ID);
+	Player(int x, int y,int size, std::string ID);
 	~Player();
 
 public:
@@ -28,6 +29,7 @@ public:
 	bool IsControllable() { return m_canControl; }
 	void IsControllable(bool flag) { m_canControl = flag;  }
 	AABB GetCollider() { return m_collider;  }
+	int GetSize() { return m_size.x;  }
 private:
 	bool m_canControl;
 	Sprite m_image;
@@ -36,5 +38,7 @@ private:
 	bool m_canMove;
 	AABB m_collider;
 	PlayState* m_state;
+	Sound m_WalkSnd;
+	Sound m_WrongMove;
 };
 

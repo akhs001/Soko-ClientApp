@@ -9,7 +9,7 @@
 class Movable :public GameObject
 {
 public:
-	Movable(int x, int y, std::string ID);
+	Movable(int x, int y,int size, std::string ID);
 	~Movable();
 
 public:
@@ -21,6 +21,7 @@ public:
 	bool CanMove(Movement movement);
 	bool IsOnPlace() { return m_OnPlace;  }
 	void IsOnPlace(bool flag) { m_OnPlace = flag; }
+	int GetSize() { return m_size.GetX(); }
 private:
 	Sprite m_image;
 	Vector2 m_position;

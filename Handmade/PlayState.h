@@ -44,8 +44,8 @@
 #include <fstream>
 #include "Sprite.h"
 
-const int MAX_WIDTH = 20;
-const int MAX_HEIGHT = 10;
+const int MAX_WIDTH = 50;
+const int MAX_HEIGHT = 50;
 
 class Button;
 class Movable;
@@ -78,6 +78,7 @@ public:	//My staff
 	void CheckIfComplete();
 	virtual std::string GetFilename() { return filename;  }
 	virtual void StartGame( std::string fileName);			//Load the Level from the file 
+
 private:
 	Background* m_image;
 	std::vector<GameObject*> m_gameObjects;

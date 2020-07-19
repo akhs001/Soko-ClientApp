@@ -5,7 +5,6 @@
 #include <SDL.h>
 
 namespace Utils {
-
 	void draw();
 	void lineBreak(int count);
 	void ShowMessage(std::string msg, std::string title);

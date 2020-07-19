@@ -3,12 +3,12 @@
 #include "Sprite.h"
 #include "AABB.h"
 
-enum  Movement { RIGHT , LEFT , UP , DOWN};
+enum  Movement {NONE , RIGHT , LEFT , UP , DOWN};
 
 class Cell :public GameObject
 {
 public:
-	Cell(int x , int y ,std::string ID);
+	Cell(int x , int y ,int size ,std::string ID);
 	~Cell();
 
 public:
@@ -18,7 +18,8 @@ public:
 	AABB GetCollider() { return m_collider;  }
 	int GetTile() { return m_Tile;  }
 	void SetTile(int tile) { m_Tile = tile; }
-
+	bool IsWalkable();
+	void SetWalkable(bool flag) { m_isWalkable = flag; }
 
 private:
 	Sprite m_image;
@@ -29,5 +30,6 @@ private:
 	std::string m_ID;
 	int m_Tile;
 	AABB m_collider;
+	bool m_isWalkable;
 };
 

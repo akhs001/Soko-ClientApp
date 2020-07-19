@@ -38,8 +38,10 @@ bool MenuState::OnEnter()
 	if (!isStaffLoaded)
 	{
 		Sound::Load("Assets/Sounds/click.mp3", "CLICK");
+		Sound::Load("Assets/Sounds/wrongMove.wav", "WRONG");
+		Sound::Load("Assets/Sounds/PlayerMove.wav", "P_MOVE");
 		//Load Images
-		for (int i = 0; i < 33; i++)
+		for (int i = 0; i < 45; i++)
 		{
 			std::string name = std::to_string(i) + ".png";
 			std::string filename = "Assets/mapImages/Decor_Tiles/" + name;
