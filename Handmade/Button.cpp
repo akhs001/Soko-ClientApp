@@ -6,12 +6,17 @@
 #include "Utils.h"
 #include "MenuState.h"
 
-static bool isfONTLoaded = false;
+static bool isLoaded = false;
 int currentBoardSize = 0;
 
 
 Button::Button(int  x,int  y , Vector2 size, const std::string& text ,const std::string& ID , bool isLevel)
 {
+	if (!isLoaded)
+	{
+		Sprite::Load("Assets/level_select/bg.png", "BUTTON");
+		isLoaded = true;
+	}
 	//If the button is Level
 	IsLevel(isLevel);
 	//The State that the button is
@@ -25,14 +30,17 @@ Button::Button(int  x,int  y , Vector2 size, const std::string& text ,const std:
 
 	//Image
 	m_image.SetSpriteDimension(m_size.GetX(), m_size.GetY());
-	m_image.SetImageDimension(1,1,256 ,256);
+	if (ID == "BUTTON")
+	{
+		m_image.SetImageDimension(1, 1, 1307, 1457);
+	}
 	m_image.SetImage(m_ID);
 	//Text
 	m_text.SetFont("FONT");
 	if (isLevel)		//If is level the button is different
 	{
 		m_text.SetColor(5, 20, 50);
-		m_text.SetSize(m_size.GetX(), m_size.GetY());
+		m_text.SetSize(m_size.GetX()/2, m_size.GetY()/2);
 		m_text.SetText(text);
 	}
 	else
@@ -50,6 +58,7 @@ Button::Button(int  x,int  y , Vector2 size, const std::string& text ,const std:
 
 Button::~Button()
 {
+	isLoaded = false;
 	Sprite::Unload(m_ID);
 }
 
@@ -80,7 +89,7 @@ void Button::Update(int deltaTime)
 		if (IsLevel())
 		{
 			//Create the path
-			std::string fileLevel = "Assets/Levels/" + m_text.GetText();
+			std::string fileLevel = "Assets/Levels/" + m_levelAssigned;
 			//And open the level
 			m_state->StartGame(fileLevel);
 			return;
@@ -89,7 +98,15 @@ void Button::Update(int deltaTime)
 		//If we click Single Player Game
 		if (m_text.GetText() == "Single Player")
 		{
+			m_state->IsMultiPlayer(false);
 			m_state->ShowLevels();
+			return;
+		}
+		//If we click Single Player Game
+		if (m_text.GetText() == "MultiPlayer")
+		{
+			m_state->IsMultiPlayer(true);
+			m_state->StartGame();
 			return;
 		}
 		//if we press back
@@ -162,6 +179,12 @@ void Button::CanClick(bool flag)
 int Button::GetColor()
 {
 	return m_color;
+}
+
+void Button::SetPos(Vector2 pos)
+{
+	m_pos = pos;
+	m_collider.SetPosition(pos.GetX(), pos.GetY());
 }
 
 Vector2 Button::GetPos()

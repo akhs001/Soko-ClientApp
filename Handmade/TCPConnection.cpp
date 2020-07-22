@@ -1,16 +1,21 @@
 #include "TCPConnection.h"
 #include <iostream>
 #include <string>
+#include "PlayState.h"
+
+
 
 TCPConnection::TCPConnection()
 {
 	//Initialize the m_ip variable
-	m_IP = { 0, 0 };
+	m_socketSet= SDLNet_AllocSocketSet(1);
+	m_ip = { 0, 0 };
+
 }
 
 
 //Initialize the SDL And SDLNet
-bool TCPConnection::Initialize(Uint16 port , IPaddress& ip)
+bool TCPConnection::Initialize(Uint16 port )
 {
 	//Initialize the SDL and SDLNet
 	if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
@@ -27,44 +32,105 @@ bool TCPConnection::Initialize(Uint16 port , IPaddress& ip)
 		return false;
 	}
 
-	//Setup the server and listening to the port 1234
-	if (SDLNet_ResolveHost(&ip, nullptr , port) == -1)
-	{
-		std::cout << "Error Creating the server" << std::endl;
-		system("pause");
-		return 0;
-	}
-
 	return true;
 }
 
-std::string TCPConnection::PrintUsername()
+void TCPConnection::ReceiveThread()
 {
-	return m_username;
+	while (m_state->IsGameRunning)
+	{
+
+
+
+	}
 }
 
-IPaddress& TCPConnection::GetIp()
-{
-	return m_IP;
-}
 
-void TCPConnection::SetUsername(std::string username)
-{
-	m_username = username;
-}
+
 
 bool TCPConnection::OpenSocket()
 {
-	return false;
+	//char address[30];
+	std::string Address = "";
+
+	char* result = InputBox( (char*)("Give the IP Address of the Server"),(char*)("Server IP Address") , (char*) ("127.0.0.1"));
+	//std::cin >> address;
+
+	if (SDLNet_ResolveHost(&m_ip, result, 1255) == -1)
+	{
+		std::cout << "Error Connecting to serverA" << std::endl;
+		return false;
+	}
+
+	m_socket = SDLNet_TCP_Open(&m_ip);
+
+	if (!m_socket)
+	{
+		std::cout << "Error Connecting to serverB" << std::endl;
+		return false;
+	}
+
+	SDLNet_TCP_AddSocket(m_socketSet, m_socket);
+	std::cout << "Connected to server" << std::endl;
 }
 
-bool TCPConnection::Send(std::string& message, std::string sender, int index)
-{
-	return false;
-}
 
 bool TCPConnection::Send(std::string& message)
 {
+	
+	if (SDLNet_TCP_Send(m_socket, message.c_str(), 15000))
+	{
+		return true;
+	}
+	return false;
+}
+
+bool TCPConnection::Receive(std::string& message)
+{
+	int haveMessage = SDLNet_CheckSockets(m_socketSet, 0);
+	
+
+
+	if (haveMessage > 0)
+	{
+		std::cout << haveMessage << std::endl;
+		if (SDLNet_SocketReady(m_socket))
+		{
+			char data[15000];
+
+
+				if (SDLNet_TCP_Recv(m_socket, &data, 15000) > 0)
+				{
+					
+					message = data;
+					if (message != "")
+					{
+						if (message[0] == 'L')
+						{
+							//Level received
+							message = message.substr(1, message.length());
+							m_state->StartGameS(message);
+						}
+						if (message[0] == 'P')			//Update all Movables Positions
+						{
+							//Movemtn received
+							message = message.substr(1, message.length());
+							m_state->UpdateMovables(message);
+						}
+						if (message[0] == 'M')			//Update all Movables Positions
+						{
+							//Movemtn received
+							message = message.substr(1, message.length());
+							m_state->UpdateServerPosition(message);
+						}
+						return true;
+					}
+
+				}
+			
+		}
+
+	}
 	return false;
 }
 

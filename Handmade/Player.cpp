@@ -5,14 +5,16 @@
 #include "PlayState.h"
 #include <string>
 #include "Movable.h"
+#include "Utils.h"
 
 Movement PlayerMove;
 
 Player::Player(int x, int y,int size,  std::string ID)
 {
+	m_isMovementEnabled = true;
+	m_canMove = true;
 	m_canControl = false;
 	m_state = NULL;
-	m_canMove = true;
 	m_position.x = x;
 	m_position.y = y;
 	m_size.x = size;
@@ -27,7 +29,6 @@ Player::Player(int x, int y,int size,  std::string ID)
 
 	m_WalkSnd.SetSound("P_MOVE");
 	m_WrongMove.SetSound("WRONG");
-
 }
 
 
@@ -72,12 +73,21 @@ bool Player::CheckCollision()
 		}
 	}
 
+	float counter = 0.0f;
 	for (Cell* c : allcells)
 	{
 		if (m_collider.IsColliding(c->GetCollider()))
 		{
-				//Check if c is passable or not
+	
+			//Check if c is passable or not
 			int numCell = c->GetTile();
+
+			//Check if is Bomb
+			if (numCell == 36)
+			{
+				m_isMovementEnabled = false;
+				m_hitBomb = true;
+			}
 			
 			return c->IsWalkable();
 		}
@@ -88,7 +98,25 @@ bool Player::CheckCollision()
 float cnt = 0.0f;
 void Player::Update(int deltaTime)
 {
-	if (!IsControllable()) { return;  } //If this not my Player return
+	if (!IsControllable() ) {
+		m_collider.SetPosition(m_position.x, m_position.y);
+		return;  } //If this not my Player return
+
+
+	//Check if you hit a bomb and show a message
+	if (m_hitBomb)
+	{
+		cnt += 0.1f;
+
+		if (cnt > 10.0f)
+		{
+			Utils::ShowMessage("You hit the Bomb. You lose", "BOOOM");
+			m_state->StartGame(m_state->GetFilename());
+		}
+		return;
+	}
+
+
 
 	///****Just a counter to Prevent continues moving*****
 	if (cnt < 1.0f && !m_canMove)
@@ -103,8 +131,9 @@ void Player::Update(int deltaTime)
 	cnt = 0.0f;
 	///****************************************************
 
+
 	//CHECK INPUT
-	if (Input::Instance()->IsKeyPressed(HM_KEY_LEFT))
+	if (Input::Instance()->IsKeyPressed(HM_KEY_LEFT) && m_isMovementEnabled)
 	{
 				//Move the Collider
 		m_collider.SetPosition(m_position.x- GetSize(), m_position.y);
@@ -114,8 +143,10 @@ void Player::Update(int deltaTime)
 		{
 			//Move the Player
 			m_WalkSnd.Play();
-			m_position.x -= GetSize();
+			m_position.x = m_position.x- GetSize();
+			m_state->UpdatePlayer();
 			m_canMove = false;
+			return;
 		}
 		else					//If we cant move
 		{
@@ -125,15 +156,17 @@ void Player::Update(int deltaTime)
 			m_canMove = false;
 		}
 	}
-	else if (Input::Instance()->IsKeyPressed(HM_KEY_RIGHT))
+	else if (Input::Instance()->IsKeyPressed(HM_KEY_RIGHT) && m_isMovementEnabled)
 	{
 		m_collider.SetPosition(m_position.x + GetSize(), m_position.y);
 		PlayerMove = RIGHT;
 		if (CheckCollision())
 		{
 			m_WalkSnd.Play();
-			m_position.x += GetSize();
+			m_position.x = m_position.x+ GetSize();
+			m_state->UpdatePlayer();
 			m_canMove = false;
+			return;
 		}
 		else
 		{
@@ -144,15 +177,17 @@ void Player::Update(int deltaTime)
 		}
 
 	}
-	else if (Input::Instance()->IsKeyPressed(HM_KEY_UP))
+	else if (Input::Instance()->IsKeyPressed(HM_KEY_UP) && m_isMovementEnabled)
 	{
 		m_collider.SetPosition(m_position.x, m_position.y - GetSize());
 		PlayerMove = UP;
 		if (CheckCollision())
 		{
 			m_WalkSnd.Play();
-			m_position.y -= GetSize();
+			m_position.y = m_position.y- GetSize();
+			m_state->UpdatePlayer();
 			m_canMove = false;
+			return;
 		}
 		else
 		{
@@ -163,15 +198,17 @@ void Player::Update(int deltaTime)
 		}
 
 	}
-	else if (Input::Instance()->IsKeyPressed(HM_KEY_DOWN))
+	else if (Input::Instance()->IsKeyPressed(HM_KEY_DOWN) && m_isMovementEnabled)
 	{
 		m_collider.SetPosition(m_position.x, m_position.y + GetSize());
 		PlayerMove = DOWN;
 		if (CheckCollision())
 		{
 			m_WalkSnd.Play();
-			m_position.y += GetSize();
+			m_position.y = m_position.y+ GetSize();
+			m_state->UpdatePlayer();
 			m_canMove = false;
+			return;
 		}
 		else
 		{

@@ -8,7 +8,7 @@
 #include "Sound.h"
 #include <filesystem>
 #include <string>
-
+#include "Screen.h"
 //------------------------------------------------------------------------------------------------------
 //constructor that assigns all default values
 //------------------------------------------------------------------------------------------------------
@@ -34,10 +34,11 @@ bool MenuState::OnEnter()
 
 	//Load Background
 	bg = new Background("Assets/Images/BG/bg.png");
-	
+
 	//Load All staff here
 	if (!isStaffLoaded)
 	{
+	
 		Sound::Load("Assets/Sounds/click.mp3", "CLICK");
 		Sound::Load("Assets/Sounds/wrongMove.wav", "WRONG");
 		Sound::Load("Assets/Sounds/PlayerMove.wav", "P_MOVE");
@@ -91,7 +92,7 @@ GameState* MenuState::Update(int deltaTime)
 		else
 		{
 			m_GameStart = false;
-			return new PlayState(FILENAME);
+			return new PlayState(FILENAME , m_isMultiplayer);
 		}
 
 	}
@@ -146,24 +147,59 @@ void MenuState::ShowLevels()
 	CheckforLevels();
 }
 
+
+
+void MenuState::Connect()
+{
+
+
+}
+
+void MenuState::StartGame()
+{
+	m_GameStart = true;
+}
+
 void MenuState::StartGame(std::string level)
 {
 	FILENAME = level;
 	m_GameStart = true;
 }
 
+
+
 void MenuState::CheckforLevels()
 {
+
+	//Clear previous level buttons
+	LevelBtns.clear();
+
 	std::string LevelPath = "Assets/Levels/";
-	int c = 1;
+	int c = 0;
 	for (const auto& entry : fs::directory_iterator(LevelPath))
 	{
 		std::string name = entry.path().filename().string();
 
-		Button* b = new Button(250 , (c *20), Vector2( 200 , 20), name , "BUTTON" , true);
+		Button* b = new Button(0, 0, Vector2(50, 50), std::to_string(c), "BUTTON", true);
 		b->SetMenuState(this);
+		b->SetLevel(name);
 		LevelBtns.push_back(b);
-		c+=1;
+		c += 1;
+	}
+	int _width = Screen::Instance()->GetResolution().x;
+	int _height = Screen::Instance()->GetResolution().y;
+
+	int  middleX = _width * 0.5f - (50 * 5 * 0.5f);
+	int  middleY = _height * 0.5f - (50 * 5 * 0.5f);
+	c = 0;
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			if (c > LevelBtns.size() - 1) { break; }
+			LevelBtns[c]->SetPos({ middleX + j * 50,middleY + i * 50 });
+			c++;
+		}
 	}
 
 }

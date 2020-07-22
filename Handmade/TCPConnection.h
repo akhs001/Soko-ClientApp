@@ -3,35 +3,36 @@
 #include <SDL.h>
 #include <SDL_net.h>
 #include <vector>
+#include "InputBox.h"
 
 
+class PlayState;
 
 class TCPConnection
 {
 public:
 	TCPConnection();
 
+
 public :
-	bool Initialize(Uint16 port, IPaddress& ip);
+	bool Initialize(Uint16 port);
+	
+	void ReceiveThread();
 
-	IPaddress& GetIp();
-	std::string PrintUsername();
-	void SetUsername(std::string username);
-
-	virtual bool OpenSocket() ;
-	virtual bool Send(std::string& message, std::string sender, int index) ;
-	virtual bool Send(std::string& message) ;
-
-	virtual void Receive(std::string& message, std::string& name, int index) {};
-	virtual void Receive(std::string& message) {};
-
-	virtual void CloseSocket() {};
+	 bool OpenSocket() ;
+	 bool Send(std::string& message) ;
+	IPaddress& Get_ip() { return m_ip; }
+	 bool Receive(std::string& message) ;
+	 void SetState(PlayState* state) { m_state = state; }
+	 void CloseSocket() {};
 
 	void ShutDown();
 
 private:
-	IPaddress m_IP;
+	IPaddress m_ip;
 	std::string m_username;
-
+	TCPsocket m_socket;
+	SDLNet_SocketSet m_socketSet;
+	PlayState* m_state;
 };
 

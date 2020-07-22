@@ -25,6 +25,8 @@ public:
 	void Update(int deltaTime);
 	bool Draw();
 	void SetPlayState(PlayState* state) { m_state = state; };
+	void SetPos(vector2 pos) { m_position = pos; }
+	vector2 GetPos() { return m_position; }
 	bool CheckCollision();
 	bool IsControllable() { return m_canControl; }
 	void IsControllable(bool flag) { m_canControl = flag;  }
@@ -32,10 +34,13 @@ public:
 	int GetSize() { return m_size.x;  }
 private:
 	bool m_canControl;
+	bool m_canMove;
+	bool m_isMovementEnabled;
+	bool m_hitBomb;
+
 	Sprite m_image;
 	vector2 m_position;
 	vector2 m_size;
-	bool m_canMove;
 	AABB m_collider;
 	PlayState* m_state;
 	Sound m_WalkSnd;
