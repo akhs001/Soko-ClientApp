@@ -2,6 +2,12 @@
 #define GAME_STATE_H
 
 
+struct LevelData
+{
+	int level;
+	int isPassed;
+};
+
 class GameState
 {
 
@@ -19,13 +25,13 @@ public:
 
 	virtual std::string GetFilename() { return ""; }
 	virtual void ShowLevels() {};
-	virtual void Connect() {};
 	virtual void StartGame() {};
-	virtual void StartGame(std::string level) {};
+	virtual void StartGame(std::string level , int lev) {};
 	virtual void GoBack() {};
 	virtual void Quit() {};
 	virtual void IsMultiPlayer(bool flag) {  }
 	virtual bool IsMultiPlayer() { return false; }
+	virtual int GetCurrentLevel() { return 0; }
 };
 
 #endif

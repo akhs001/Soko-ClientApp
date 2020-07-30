@@ -23,7 +23,7 @@ Cell::Cell(int x, int y, int size , std::string ID)
 
 Cell::~Cell()
 {
-	m_image.Unload();
+	m_image.Unload(m_ID);
 }
 
 void Cell::Update(int deltaTime)

@@ -3,6 +3,7 @@
 #include "MenuState.h"
 #include "Screen.h"
 #include "Text.h"
+#include "Music.h"
 
 //------------------------------------------------------------------------------------------------------
 //constructor that assigns all default values

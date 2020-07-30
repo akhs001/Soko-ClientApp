@@ -19,7 +19,7 @@ Player::Player(int x, int y,int size,  std::string ID)
 	m_position.y = y;
 	m_size.x = size;
 	m_size.y = size;
-
+	m_ID = ID;
 	m_image.SetImageDimension(1, 1, IMAGE_SIZE, IMAGE_SIZE);
 	m_image.SetSpriteDimension(m_size.x , m_size.y);
 	m_image.SetImage(ID);
@@ -28,14 +28,16 @@ Player::Player(int x, int y,int size,  std::string ID)
 	m_collider.SetPosition(m_position.x, m_position.y);
 
 	m_WalkSnd.SetSound("P_MOVE");
+	m_WalkSnd.SetVolume(15);
 	m_WrongMove.SetSound("WRONG");
+	m_WrongMove.SetVolume(15);
 }
 
 
 
 Player::~Player()
 {
-	m_image.Unload();
+	m_image.Unload(m_ID);
 }
 
 
@@ -102,6 +104,10 @@ void Player::Update(int deltaTime)
 		m_collider.SetPosition(m_position.x, m_position.y);
 		return;  } //If this not my Player return
 
+	if (!m_state->IsGaneStarted())
+	{
+		return;
+	}
 
 	//Check if you hit a bomb and show a message
 	if (m_hitBomb)
@@ -111,7 +117,7 @@ void Player::Update(int deltaTime)
 		if (cnt > 10.0f)
 		{
 			Utils::ShowMessage("You hit the Bomb. You lose", "BOOOM");
-			m_state->StartGame(m_state->GetFilename());
+			m_state->StartGame(m_state->GetFilename() , m_state->GetCurrentLevel());
 		}
 		return;
 	}

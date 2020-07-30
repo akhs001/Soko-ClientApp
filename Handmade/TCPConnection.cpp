@@ -2,8 +2,9 @@
 #include <iostream>
 #include <string>
 #include "PlayState.h"
+#include "Utils.h"
 
-
+static bool isInitialized = false;
 
 TCPConnection::TCPConnection()
 {
@@ -17,6 +18,7 @@ TCPConnection::TCPConnection()
 //Initialize the SDL And SDLNet
 bool TCPConnection::Initialize(Uint16 port )
 {
+	if (isInitialized) { return true;  }
 	//Initialize the SDL and SDLNet
 	if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
 	{
@@ -31,19 +33,10 @@ bool TCPConnection::Initialize(Uint16 port )
 		system("pause");
 		return false;
 	}
-
+	isInitialized = true;
 	return true;
 }
 
-void TCPConnection::ReceiveThread()
-{
-	while (m_state->IsGameRunning)
-	{
-
-
-
-	}
-}
 
 
 
@@ -54,7 +47,12 @@ bool TCPConnection::OpenSocket()
 	std::string Address = "";
 
 	char* result = InputBox( (char*)("Give the IP Address of the Server"),(char*)("Server IP Address") , (char*) ("127.0.0.1"));
-	//std::cin >> address;
+	std::string r = result;
+
+	if (r.length() ==0)
+	{
+		return false;
+	}
 
 	if (SDLNet_ResolveHost(&m_ip, result, 1255) == -1)
 	{
@@ -62,6 +60,7 @@ bool TCPConnection::OpenSocket()
 		return false;
 	}
 
+	m_socket = nullptr;
 	m_socket = SDLNet_TCP_Open(&m_ip);
 
 	if (!m_socket)
@@ -85,12 +84,14 @@ bool TCPConnection::Send(std::string& message)
 	return false;
 }
 
+IPaddress& TCPConnection::Get_ip()
+{
+	return m_ip;
+}
+
 bool TCPConnection::Receive(std::string& message)
 {
 	int haveMessage = SDLNet_CheckSockets(m_socketSet, 0);
-	
-
-
 	if (haveMessage > 0)
 	{
 		std::cout << haveMessage << std::endl;
@@ -109,7 +110,7 @@ bool TCPConnection::Receive(std::string& message)
 						{
 							//Level received
 							message = message.substr(1, message.length());
-							m_state->StartGameS(message);
+							m_state->StartGameS(message);		//The level
 						}
 						if (message[0] == 'P')			//Update all Movables Positions
 						{
@@ -119,19 +120,21 @@ bool TCPConnection::Receive(std::string& message)
 						}
 						if (message[0] == 'M')			//Update all Movables Positions
 						{
-							//Movemtn received
+							//Movement received
 							message = message.substr(1, message.length());
 							m_state->UpdateServerPosition(message);
 						}
 						return true;
 					}
-
 				}
-			
 		}
-
 	}
 	return false;
+}
+
+void TCPConnection::SetState(PlayState* state)
+{
+	m_state = state;
 }
 
 

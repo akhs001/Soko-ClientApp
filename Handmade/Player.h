@@ -38,6 +38,7 @@ private:
 	bool m_isMovementEnabled;
 	bool m_hitBomb;
 
+	std::string m_ID;
 	Sprite m_image;
 	vector2 m_position;
 	vector2 m_size;
